@@ -12,7 +12,7 @@ It is an information and education tool, not a laboratory, medical, nutrition, o
 
 ## Project status
 
-This repository currently contains the project documentation and implementation contract. Source code will be added according to [`docs/PHASES.md`](docs/PHASES.md).
+Phase 1 is implemented: a responsive, dark-mode landing page for `sork.`. The dashboard remains intentionally out of scope until a later phase.
 
 ## Planned stack
 
@@ -41,6 +41,7 @@ This repository currently contains the project documentation and implementation 
 - [`docs/TESTING.md`](docs/TESTING.md) — testing and acceptance strategy.
 - [`docs/DEMO-RUNBOOK.md`](docs/DEMO-RUNBOOK.md) — presentation flow and demo recovery steps.
 - [`docs/DECISIONS.md`](docs/DECISIONS.md) — important product and technical decisions.
+- [`design.md`](design.md) — landing-page visual direction and component rules.
 
 ## Open Food Facts
 
