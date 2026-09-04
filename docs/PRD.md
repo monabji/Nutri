@@ -2,7 +2,7 @@
 
 ## Product
 
-Soil2Fork makes the hidden trade-offs behind packaged food easier to understand. A user enters a barcode, sees verified product information, then explores how temperature, time, transport mode, and route assumptions affect a modeled supply-chain scenario.
+Sork makes the hidden trade-offs behind packaged food easier to understand. A user enters a barcode, sees verified product information, then explores how temperature, time, transport mode, and route assumptions affect a modeled supply-chain scenario.
 
 ## Problem
 
@@ -23,7 +23,7 @@ The product addresses this information gap with an interactive explanation, not 
 
 ## MVP user journey
 
-1. User lands on the Soil2Fork landing page.
+1. User lands on the Sork landing page.
 2. User enters a valid 13-digit EAN barcode or selects a verified barcode preset.
 3. The app fetches product facts from Open Food Facts.
 4. The app displays available product facts and clearly identifies missing fields.

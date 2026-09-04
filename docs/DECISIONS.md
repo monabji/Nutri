@@ -4,7 +4,7 @@
 
 Status: accepted.
 
-Soil2Fork is an informational hackathon demo. It does not need accounts, persistence, or identity.
+Sork is an informational hackathon demo. It does not need accounts, persistence, or identity.
 
 ## Decision 2 — Live product facts
 

@@ -1,8 +1,8 @@
-# Soil2Fork Architecture
+# Sork Architecture
 
 ## Architectural shape
 
-Soil2Fork is a client-first React application with three separate concerns:
+Sork is a client-first React application with three separate concerns:
 
 ```text
 User input
