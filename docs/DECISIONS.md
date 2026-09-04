@@ -4,7 +4,7 @@
 
 Status: accepted.
 
-Sork is an informational hackathon demo. It does not need accounts, persistence, or identity.
+sork. is an informational hackathon demo. It does not need accounts, persistence, or identity.
 
 ## Decision 2 — Live product facts
 

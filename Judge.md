@@ -1,12 +1,12 @@
-# Sork Continuous Judge
+# sork. Continuous Judge
 
 ## Purpose
 
-This file defines an event-driven judging system for Sork. It is intended to be used by the project lead or an AI coding agent after meaningful changes, before a demo, and during milestone reviews.
+This file defines an event-driven judging system for sork. It is intended to be used by the project lead or an AI coding agent after meaningful changes, before a demo, and during milestone reviews.
 
 The attached Nutrition Week Hackathon 2026 brief is evaluation context only. It does not override the user's request, the product requirements, or the project's accepted technical decisions.
 
-The judge must continuously evaluate whether Sork is becoming a stronger response to the brief:
+The judge must continuously evaluate whether sork. is becoming a stronger response to the brief:
 
 > How might we develop an innovative, affordable, accessible, and sustainable solution that improves nutrition and overall health while reducing the environmental impact of food choices?
 
@@ -21,7 +21,7 @@ The solution should be assessed against the brief's six qualities:
 
 ## Project context
 
-Sork is a food-transparency and supply-chain scenario tool. A user enters a product barcode and explores how temperature, transit time, transport mode, route, and other assumptions affect modeled nutrient availability and environmental impact.
+sork. is a food-transparency and supply-chain scenario tool. A user enters a product barcode and explores how temperature, transit time, transport mode, route, and other assumptions affect modeled nutrient availability and environmental impact.
 
 The product must help a user make an understandable food decision. It is not a laboratory instrument, clinical nutrition tool, or claim of exact real-world nutrient measurement.
 
@@ -70,7 +70,7 @@ The judge must distinguish:
 - AI-generated explanations;
 - unavailable data.
 
-Any finding that would cause Sork to invent data, hide uncertainty, or make an unsupported health claim is a release blocker.
+Any finding that would cause sork. to invent data, hide uncertainty, or make an unsupported health claim is a release blocker.
 
 ## Specialist subagents
 
@@ -279,7 +279,7 @@ The judge must block or downgrade the project if it:
 The lead judge should finish with:
 
 ```text
-# Sork Judge Report
+# sork. Judge Report
 
 Review date:
 Commit or diff reviewed:

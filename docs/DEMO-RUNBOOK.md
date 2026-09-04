@@ -2,7 +2,7 @@
 
 ## Narrative
 
-“A barcode tells us what a product is, but not what happened to it on the way to the shelf. Sork combines public product facts with a transparent transport scenario so people can see both what is known and what is being modeled.”
+“A barcode tells us what a product is, but not what happened to it on the way to the shelf. sork. combines public product facts with a transparent transport scenario so people can see both what is known and what is being modeled.”
 
 ## Three-minute flow
 
@@ -39,7 +39,7 @@
 
 ### 6. Close — 10 seconds
 
-“Sork turns an opaque food journey into an explorable decision surface while making the boundary between evidence and estimation visible.”
+“sork. turns an opaque food journey into an explorable decision surface while making the boundary between evidence and estimation visible.”
 
 ## Demo preparation
 

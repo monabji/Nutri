@@ -1,6 +1,6 @@
-# Sork
+# sork.
 
-Sork is a no-auth hackathon web app that turns an EAN-13 barcode into a transparent food-supply-chain scenario dashboard.
+sork. is a no-auth hackathon web app that turns an EAN-13 barcode into a transparent food-supply-chain scenario dashboard.
 
 The app combines:
 

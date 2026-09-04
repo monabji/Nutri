@@ -1,8 +1,8 @@
-# Sork Architecture
+# sork. Architecture
 
 ## Architectural shape
 
-Sork is a client-first React application with three separate concerns:
+sork. is a client-first React application with three separate concerns:
 
 ```text
 User input
