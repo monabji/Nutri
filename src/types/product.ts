@@ -21,6 +21,7 @@ export type ProductFacts = {
   countries?: string[]
   quantityGrams?: number
   nutrients: Record<string, NutrientValue>
+  estimatedNutrients?: Record<string, NutrientValue>
   sourceUrl: string
   fetchedAt: string
 }

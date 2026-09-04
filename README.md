@@ -7,6 +7,7 @@ The app combines:
 1. Live product facts from Open Food Facts.
 2. User-controlled transport assumptions.
 3. Clearly labeled local estimates for nutrient decay and transport emissions.
+4. Optional server-side Gemini estimates for missing micronutrients, kept separate from source facts.
 
 It is an information and education tool, not a laboratory, medical, nutrition, or environmental accounting system.
 
@@ -20,6 +21,8 @@ Phases 1–4 are implemented locally:
 - Ingredient/additive signals, an optional resolved route map, a decay curve, and a mobile camera barcode scanner.
 
 The dashboard is informational: source facts and scenario estimates remain visually and semantically distinct.
+
+Gemini is used only when Open Food Facts does not report the supported Vitamin C/B fields. Estimates are educational baselines, never measured nutrition data. Configure the server-side key with `GEMINI_API_KEY` in `.env.local`; never expose or commit it.
 
 ## Planned stack
 

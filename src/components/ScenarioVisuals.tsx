@@ -28,7 +28,8 @@ function ScenarioCard({ icon, label, value, detail, unavailable }: { icon: React
 const formatDate = (date?: string) => date ? new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(date)) : undefined
 
 export function ScenarioVisuals({ product, scenario, route }: Props) {
-  const vitamin = useMemo(() => Object.keys(product.nutrients).find((nutrient) => nutrient.startsWith('Vitamin')), [product.nutrients])
+  const availableNutrients = useMemo(() => ({ ...product.nutrients, ...product.estimatedNutrients }), [product.nutrients, product.estimatedNutrients])
+  const vitamin = useMemo(() => Object.keys(availableNutrients).find((nutrient) => nutrient.startsWith('Vitamin')), [availableNutrients])
   const decay = useMemo(() => calculateDecay(vitamin, scenario), [vitamin, scenario])
   const emissions = useMemo(() => calculateEmissions(scenario), [scenario])
   const ingredients = useMemo(() => analyzeIngredients(product.ingredientsText, product.additives), [product.ingredientsText, product.additives])
@@ -91,7 +92,7 @@ export function ScenarioVisuals({ product, scenario, route }: Props) {
               </ResponsiveContainer>
             </div>
           ) : <div className="visual-unavailable"><AlertTriangle size={18} /><p>{decay.reason}</p></div>}
-          <p className="visual-note">Q10 = {modelConfig.q10}; reference temperature = {modelConfig.referenceTemperatureC}°C; baseline rate = {modelConfig.baselineLossPerHour}/hour.</p>
+          <p className="visual-note">{product.estimatedNutrients?.[vitamin || ''] ? 'Baseline nutrient is a Gemini estimate, not a source-reported value. ' : ''}Q10 = {modelConfig.q10}; reference temperature = {modelConfig.referenceTemperatureC}°C; baseline rate = {modelConfig.baselineLossPerHour}/hour.</p>
         </article>
 
         <article className="scenario-visual-card route-card">
