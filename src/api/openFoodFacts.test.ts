@@ -22,7 +22,7 @@ describe('Open Food Facts client', () => {
   it('refuses malformed barcode arguments before making a request', async () => {
     const fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
-    await expect(fetchProduct('not-a-barcode')).rejects.toThrow('Enter a valid 13-digit EAN barcode.')
+    await expect(fetchProduct('not-a-barcode')).rejects.toThrow('Enter an 8–14 digit product barcode.')
     expect(fetchMock).not.toHaveBeenCalled()
   })
 

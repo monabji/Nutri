@@ -15,6 +15,7 @@ export const productFields = [
   'product_quantity',
   'product_quantity_unit',
   'packaging',
+  'manufacturing_places',
   'nutriments',
 ] as const
 
@@ -30,6 +31,7 @@ export type RawProduct = {
   additives_tags?: string[]
   packaging_tags?: string[]
   packaging?: Array<{ material?: string; shape?: string; recycling?: string }> | { material?: string; shape?: string; recycling?: string }
+  manufacturing_places?: string
   origins?: string
   countries?: string
   quantity?: string
@@ -47,6 +49,11 @@ const nutrientDefinitions = [
   ['Saturated fat', 'saturated-fat_100g', 'g/100g'],
   ['Fibre', 'fiber_100g', 'g/100g'],
   ['Salt', 'salt_100g', 'g/100g'],
+  ['Vitamin C', 'vitamin-c_100g', 'mg/100g'],
+  ['Vitamin B1', 'vitamin-b1_100g', 'mg/100g'],
+  ['Vitamin B2', 'vitamin-b2_100g', 'mg/100g'],
+  ['Vitamin B6', 'vitamin-b6_100g', 'mg/100g'],
+  ['Vitamin B12', 'vitamin-b12_100g', 'µg/100g'],
 ] as const
 
 function splitList(value?: string) {
@@ -117,6 +124,7 @@ export function normalizeProduct(raw: RawProduct, requestedBarcode: string): Pro
     ingredientsText: raw.ingredients_text?.trim() || undefined,
     additives: raw.additives_tags?.map((tag) => tag.replace(/^en:/, '')).filter(Boolean),
     packaging: normalizePackaging(raw.packaging_tags, raw.packaging),
+    manufacturingPlaces: raw.manufacturing_places?.trim() ? [raw.manufacturing_places.trim()] : undefined,
     origins: splitList(raw.origins),
     countries: splitList(raw.countries),
     quantityGrams: quantityToGrams(raw),

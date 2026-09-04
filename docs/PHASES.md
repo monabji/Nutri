@@ -48,6 +48,8 @@ Exit criteria: a live barcode lookup renders verified product facts without mock
 
 ## Phase 3 — Scenario engine
 
+Status: implemented locally.
+
 Owner A:
 
 - Implement Q10 decay calculations.
@@ -63,6 +65,8 @@ Owner B:
 Exit criteria: changing temperature, transit time, mass, distance, or mode produces deterministic typed results.
 
 ## Phase 4 — Visual dashboard
+
+Status: implemented locally.
 
 Owner B:
 

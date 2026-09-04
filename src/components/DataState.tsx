@@ -8,7 +8,7 @@ type Props = {
 
 export function DataState({ type, message, onRetry }: Props) {
   const details = {
-    idle: ['Look up a product to begin.', 'Enter an EAN-13 barcode or select a documented preset.'],
+    idle: ['Look up a product to begin.', 'Enter a product barcode or select a documented preset.'],
     loading: ['Looking up the product record…', 'Reading live facts from Open Food Facts.'],
     'not-found': ['No product record found.', 'Open Food Facts does not currently have a record for this barcode.'],
     error: ['The product record is unavailable.', message || 'Try the lookup again in a moment.'],

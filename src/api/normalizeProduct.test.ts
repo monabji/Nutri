@@ -6,10 +6,11 @@ describe('Open Food Facts normalizer', () => {
     const product = normalizeProduct({
       code: '8906009532363', product_name: 'Protein Bar', brands: 'Brand One, Brand Two', nova_group: 4,
       ecoscore_grade: 'b', ingredients_text: 'Oats', additives_tags: ['en:e322'], packaging_tags: ['en:plastic'],
-      origins: 'India', quantity: '0.05 kg', nutriments: { 'energy-kcal_100g': 380, proteins_100g: 20 },
+      manufacturing_places: 'Plant A, Bengaluru', origins: 'India', quantity: '0.05 kg', nutriments: { 'energy-kcal_100g': 380, proteins_100g: 20 },
     }, '8906009532363')
     expect(product).toMatchObject({ barcode: '8906009532363', name: 'Protein Bar', brands: ['Brand One', 'Brand Two'], novaGroup: 4, ecoScore: 'B', quantityGrams: 50 })
     expect(product.nutrients.Energy).toEqual({ value: 380, unit: 'kcal/100g' })
+    expect(product.manufacturingPlaces).toEqual(['Plant A, Bengaluru'])
     expect(findMissingFields(product)).toEqual([])
   })
 

@@ -16,6 +16,7 @@ export type ProductFacts = {
   ingredientsText?: string
   additives?: string[]
   packaging?: PackagingComponent[]
+  manufacturingPlaces?: string[]
   origins?: string[]
   countries?: string[]
   quantityGrams?: number

@@ -12,7 +12,14 @@ It is an information and education tool, not a laboratory, medical, nutrition, o
 
 ## Project status
 
-Phase 1 is implemented: a responsive, dark-mode landing page for `sork.`. The dashboard remains intentionally out of scope until a later phase.
+Phases 1–4 are implemented locally:
+
+- A responsive, dark-mode landing page and live Open Food Facts barcode lookup.
+- Scenario controls for transit temperature, time, product mass, distance, and transport mode.
+- Transparent local estimates for nutrient availability and freight emissions.
+- Ingredient/additive signals, an optional resolved route map, a decay curve, and a mobile camera barcode scanner.
+
+The dashboard is informational: source facts and scenario estimates remain visually and semantically distinct.
 
 ## Planned stack
 

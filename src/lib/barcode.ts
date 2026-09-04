@@ -13,11 +13,15 @@ export function isValidEan13(value: string) {
   return (10 - (sum % 10)) % 10 === Number(value[12])
 }
 
+export function isSupportedProductBarcode(value: string) {
+  return /^\d{8,14}$/.test(value)
+}
+
 export function validateBarcode(value: string) {
   const barcode = normalizeBarcode(value)
   return {
     barcode,
-    valid: isValidEan13(barcode),
-    message: 'Enter a valid 13-digit EAN barcode.',
+    valid: isSupportedProductBarcode(barcode),
+    message: 'Enter an 8–14 digit product barcode.',
   }
 }

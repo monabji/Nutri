@@ -49,6 +49,11 @@ Output:
 
 The result must be labeled as an estimate. It must not be described as measured nutrient content.
 
+Current local model configuration is versioned as `1.0`: a 20°C reference
+temperature, Q10 of 2, a 0.003 per-hour baseline loss coefficient, a 70%
+availability horizon, and an 80% modeled loss reduction for the cold-chain
+comparison. These are scenario assumptions, not claims about a specific product.
+
 ### Transport emissions
 
 Inputs:
@@ -59,6 +64,10 @@ Inputs:
 - Documented freight-intensity coefficient.
 
 If mass or distance is missing, the result is unavailable. The app must not infer a route or product mass from the brand, product name, or barcode.
+
+The current local factors are 0.09 kg CO₂e per tonne-km for an ambient truck
+and 0.126 kg CO₂e per tonne-km for a cold-chain reefer. The reefer factor is a
+40% comparison modifier. Both values are displayed as model assumptions.
 
 ### Packaging
 
@@ -91,3 +100,27 @@ The dashboard must provide a compact expandable panel containing:
 - Model version.
 - Model coefficients and scenario modifiers.
 - Plain-language disclaimer.
+
+## Optional camera and route inputs
+
+- Barcode camera scanning is a client-side convenience input. A detected EAN-13
+  value is validated before the existing live lookup flow runs; no image is
+  uploaded or retained by the app.
+- A route map is optional. When a user enters an origin and destination, the app
+  asks OpenStreetMap's Nominatim service to resolve the places. The drawn line
+  is a direct geographic connection, not a claim about a real road route.
+- After a successful scan, the app also attempts an automatic route only when
+  Open Food Facts supplies `manufacturing_places` and the visitor grants device
+  location permission. It geocodes that source-provided place, requests an OSRM
+  driving route to the device location, and samples current Open-Meteo
+  temperatures along that route. If the manufacturing place is absent but the
+  source reports a country, that country is offered as a visibly labelled
+  geographic proxy; it is never called a factory. The resulting distance,
+  duration, and weather are live context—not proof of the product's actual
+  historical journey.
+- If a manufacturing place, location permission, route, or weather is absent,
+  the corresponding output stays unavailable. The app never substitutes a
+  brand, barcode prefix, or preconfigured factory location.
+- The client serializes and caches Nominatim requests to respect its public
+  one-request-per-second constraint. A production release should use an
+  identified server-side geocoding provider or an approved Nominatim deployment.
