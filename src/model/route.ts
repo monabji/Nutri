@@ -1,4 +1,5 @@
 import type { Availability, Coordinate, ResolvedRoute, RouteWeather } from '../types/scenario'
+import { FIXED_DESTINATION } from '../config/route'
 
 type NominatimResult = { lat?: string; lon?: string; display_name?: string }
 type OsrmRoute = { distance?: number; duration?: number; geometry?: { coordinates?: [number, number][] } }
@@ -6,7 +7,8 @@ type OpenMeteoResult = { current?: { temperature_2m?: number; time?: string } }
 
 export type AutomaticOrigin = {
   query: string
-  kind: 'manufacturing-place' | 'country-proxy'
+  kind: 'manufacturing-place' | 'country-proxy' | 'researched-source'
+  sourceEvidence?: Array<{ title: string; url: string }>
 }
 
 const nominatimCache = new Map<string, Coordinate | undefined>()
@@ -42,19 +44,6 @@ export async function geocodePlace(query: string, signal?: AbortSignal): Promise
   return resolved
 }
 
-function getDeviceLocation(signal?: AbortSignal): Promise<Coordinate> {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) { reject(new Error('Device location is not available in this browser.')); return }
-    const onAbort = () => reject(new DOMException('Location request cancelled.', 'AbortError'))
-    signal?.addEventListener('abort', onAbort, { once: true })
-    navigator.geolocation.getCurrentPosition(
-      (position) => { signal?.removeEventListener('abort', onAbort); resolve({ latitude: position.coords.latitude, longitude: position.coords.longitude, label: 'Your device location' }) },
-      () => { signal?.removeEventListener('abort', onAbort); reject(new Error('Location permission is needed to automatically resolve the destination.')) },
-      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 300_000 },
-    )
-  })
-}
-
 async function getDrivingRoute(origin: Coordinate, destination: Coordinate, signal?: AbortSignal) {
   const coordinates = `${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}`
   const response = await fetch(`https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson`, { signal })
@@ -85,15 +74,19 @@ async function getRouteWeather(path: [number, number][], signal?: AbortSignal): 
   return { averageTemperatureC: values.reduce((sum, value) => sum + value, 0) / values.length, minimumTemperatureC: Math.min(...values), maximumTemperatureC: Math.max(...values), sampleCount: values.length, observedAt: records[0]?.current?.time }
 }
 
-export async function resolveAutomaticRoute(originInput: AutomaticOrigin | undefined, signal?: AbortSignal): Promise<Availability<ResolvedRoute>> {
+export async function resolveAutomaticRoute(originInput: AutomaticOrigin | undefined, signal?: AbortSignal, mode: 'road' | 'air' | 'sea' = 'road'): Promise<Availability<ResolvedRoute>> {
   if (!originInput) return { status: 'unavailable', reason: 'Open Food Facts does not report a manufacturing place or country that can be used as a route origin.' }
   try {
-    const [origin, destination] = await Promise.all([geocodePlace(originInput.query, signal), getDeviceLocation(signal)])
-    if (!origin) return { status: 'unavailable', reason: `The source-reported ${originInput.kind === 'manufacturing-place' ? 'manufacturing place' : 'country'} could not be located.` }
-    const driving = await getDrivingRoute(origin, destination, signal)
-    const path = driving.path?.length ? driving.path : [[origin.latitude, origin.longitude], [destination.latitude, destination.longitude]] as [number, number][]
-    const weather = await getRouteWeather(path, signal)
-    return { status: 'available', value: { origin, destination, ...driving, path, weather, routingKind: 'driving', originKind: originInput.kind } }
+    const [origin, destination] = await Promise.all([geocodePlace(originInput.query, signal), geocodePlace(FIXED_DESTINATION.query, signal)])
+    if (!origin || !destination) return { status: 'unavailable', reason: `The ${!origin ? 'source-reported origin' : 'fixed Katpadi destination'} could not be located.` }
+    const path = [[origin.latitude, origin.longitude], [destination.latitude, destination.longitude]] as [number, number][]
+    const radians = (value: number) => value * Math.PI / 180
+    const a = Math.sin(radians(destination.latitude - origin.latitude) / 2) ** 2 + Math.cos(radians(origin.latitude)) * Math.cos(radians(destination.latitude)) * Math.sin(radians(destination.longitude - origin.longitude) / 2) ** 2
+    const greatCircleKm = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    const route = mode === 'road' ? await getDrivingRoute(origin, destination, signal) : { path, distanceKm: greatCircleKm, durationHours: greatCircleKm / (mode === 'air' ? 700 : 35) + (mode === 'air' ? 4 : 24) }
+    const routePath = route.path?.length ? route.path : path
+    const weather = await getRouteWeather(routePath, signal)
+    return { status: 'available', value: { origin, destination: { ...destination, label: FIXED_DESTINATION.label }, ...route, path: routePath, weather, routingKind: mode === 'road' ? 'driving' : 'direct-line', originKind: originInput.kind, sourceEvidence: originInput.sourceEvidence } }
   } catch (error) {
     if (signal?.aborted) throw error
     return { status: 'unavailable', reason: error instanceof Error ? error.message : 'The automatic route could not be resolved right now.' }

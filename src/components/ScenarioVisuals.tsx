@@ -69,9 +69,9 @@ export function ScenarioVisuals({ product, scenario, route }: Props) {
           icon={<BarChart3 size={16} />}
           label="Processing & additives"
           value={product.novaGroup ? `NOVA ${product.novaGroup}` : undefined}
-          detail={ingredients.additiveCodes.length
+          detail={`NOVA shows how processed the food is: 1 is least processed and 4 is most. ${ingredients.additiveCodes.length
             ? `Listed additive codes: ${ingredients.additiveCodes.join(', ')}.${ingredients.sugarAliases.length ? ` Sugar terms listed: ${ingredients.sugarAliases.join(', ')}.` : ''}`
-            : ingredients.sugarAliases.length ? `Sugar terms listed: ${ingredients.sugarAliases.join(', ')}.` : 'No source-listed additive codes or sugar aliases were detected.'}
+            : ingredients.sugarAliases.length ? `Sugar terms listed: ${ingredients.sugarAliases.join(', ')}.` : 'No source-listed additive codes or sugar aliases were detected.'}`}
           unavailable={!product.novaGroup && !ingredients.additiveCodes.length && !ingredients.sugarAliases.length}
         />
       </div>
@@ -80,11 +80,11 @@ export function ScenarioVisuals({ product, scenario, route }: Props) {
         <article className="scenario-visual-card decay-chart-card">
           <div className="visual-card-heading"><h3>Modeled availability curve</h3><span>{transportModeLabels[scenario.transportMode]}</span></div>
           {decay.status === 'available' ? (
-            <div className="chart-wrap" role="img" aria-label={`Projected ${decay.value.nutrient} availability across 48 hours`}>
+            <div className="chart-wrap" role="img" aria-label={`Projected ${decay.value.nutrient} availability across ${scenario.transitHours} hours`}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={decay.value.series} margin={{ top: 12, right: 12, left: -12, bottom: 0 }}>
                   <CartesianGrid stroke="#3a3a3a" strokeDasharray="2 6" vertical={false} />
-                  <XAxis dataKey="hour" tick={{ fill: '#a0a0a0', fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}h`} interval={11} />
+                  <XAxis dataKey="hour" tick={{ fill: '#a0a0a0', fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}h`} interval={Math.max(1, Math.floor(decay.value.series.length / 6))} />
                   <YAxis domain={[0, 100]} tick={{ fill: '#a0a0a0', fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}%`} width={38} />
                   <Tooltip cursor={{ stroke: '#6b6b6b', strokeDasharray: '4 4' }} contentStyle={{ background: '#171717', border: '1px solid #4a4a4a', borderRadius: '10px', color: '#f4f4f4' }} labelFormatter={(value) => `${value} hours`} formatter={(value) => [`${value}%`, 'Remaining']} />
                   <Line type="monotone" dataKey="remainingPercent" stroke={scenario.transportMode === 'cold-chain-reefer' ? '#b8b8b8' : '#f2f2f2'} strokeWidth={2.4} dot={false} activeDot={{ r: 4 }} />
@@ -92,7 +92,7 @@ export function ScenarioVisuals({ product, scenario, route }: Props) {
               </ResponsiveContainer>
             </div>
           ) : <div className="visual-unavailable"><AlertTriangle size={18} /><p>{decay.reason}</p></div>}
-          <p className="visual-note">{product.estimatedNutrients?.[vitamin || ''] ? 'Baseline nutrient is a Gemini estimate, not a source-reported value. ' : ''}Q10 = {modelConfig.q10}; reference temperature = {modelConfig.referenceTemperatureC}°C; baseline rate = {modelConfig.baselineLossPerHour}/hour.</p>
+          <p className="visual-note">{product.estimatedNutrients?.[vitamin || ''] ? 'Baseline nutrient is modeled because the source record was incomplete. ' : ''}Q10 = {modelConfig.q10}; reference temperature = {modelConfig.referenceTemperatureC}°C; baseline rate = {modelConfig.baselineLossPerHour}/hour.</p>
         </article>
 
         <article className="scenario-visual-card route-card">
@@ -101,7 +101,7 @@ export function ScenarioVisuals({ product, scenario, route }: Props) {
             ? <RouteMap route={route.value} transportMode={scenario.transportMode} />
             : <div className="visual-unavailable"><Leaf size={18} /><p>{route.reason}</p></div>}
           <p className="visual-note">{route.status === 'available' && route.value.routingKind === 'driving'
-            ? `${route.value.distanceKm?.toFixed(1)} km · ${route.value.durationHours?.toFixed(1)} h driving route. ${route.value.originKind === 'country-proxy' ? 'Origin is a source-reported country proxy because no manufacturing place was reported. ' : ''}${route.value.weather ? `Current weather across ${route.value.weather.sampleCount} route points: ${route.value.weather.averageTemperatureC.toFixed(1)}°C average (${route.value.weather.minimumTemperatureC.toFixed(1)}–${route.value.weather.maximumTemperatureC.toFixed(1)}°C).` : 'Current route weather was unavailable.'}`
+            ? `${route.value.distanceKm?.toFixed(1)} km · ${route.value.durationHours?.toFixed(1)} h driving route. ${route.value.originKind === 'country-proxy' ? 'The country-level origin is a geographic proxy because no manufacturing place was reported. ' : route.value.originKind === 'researched-source' ? 'The origin was resolved from current public manufacturing information because no place was reported in the product record. ' : ''}${route.value.weather ? `Current weather across ${route.value.weather.sampleCount} route points: ${route.value.weather.averageTemperatureC.toFixed(1)}°C average (${route.value.weather.minimumTemperatureC.toFixed(1)}–${route.value.weather.maximumTemperatureC.toFixed(1)}°C).` : 'Current route weather was unavailable.'}`
             : 'Manual map paths are direct-line scenarios for orientation, not road-routing claims. Place names are resolved by OpenStreetMap Nominatim.'}</p>
         </article>
       </div>

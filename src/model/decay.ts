@@ -37,14 +37,14 @@ export function calculateDecay(
   if (!Number.isFinite(input.temperatureC) || input.temperatureC < 15 || input.temperatureC > 42) {
     return { status: 'unavailable', reason: 'Enter a transit temperature between 15°C and 42°C.' }
   }
-  if (!Number.isFinite(input.transitHours) || input.transitHours < 0 || input.transitHours > 48) {
-    return { status: 'unavailable', reason: 'Enter a transit duration between 0 and 48 hours.' }
+  if (!Number.isFinite(input.transitHours) || input.transitHours < 0) {
+    return { status: 'unavailable', reason: 'The calculated transit duration is not valid.' }
   }
 
   const ratePerHour = rateForScenario(input)
   const remainingAtHour = (hour: number) => 100 * Math.exp(-ratePerHour * hour)
   const remainingPercent = remainingAtHour(input.transitHours)
-  const series = Array.from({ length: 49 }, (_, hour) => ({
+  const series = Array.from({ length: Math.ceil(input.transitHours) + 1 }, (_, hour) => ({
     hour,
     remainingPercent: round(remainingAtHour(hour)),
   }))

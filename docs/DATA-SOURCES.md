@@ -109,15 +109,14 @@ The dashboard must provide a compact expandable panel containing:
 - A route map is optional. When a user enters an origin and destination, the app
   asks OpenStreetMap's Nominatim service to resolve the places. The drawn line
   is a direct geographic connection, not a claim about a real road route.
-- After a successful scan, the app also attempts an automatic route only when
-  Open Food Facts supplies `manufacturing_places` and the visitor grants device
-  location permission. It geocodes that source-provided place, requests an OSRM
-  driving route to the device location, and samples current Open-Meteo
-  temperatures along that route. If the manufacturing place is absent but the
-  source reports a country, that country is offered as a visibly labelled
-  geographic proxy; it is never called a factory. The resulting distance,
-  duration, and weather are live context—not proof of the product's actual
-  historical journey.
+- After a successful scan, the app attempts an automatic route to the fixed demo
+  destination `Katpadi, Vellore`. It prefers the manufacturing place reported by
+  Open Food Facts. If that place is absent but the source reports a country, a
+  server-side grounded lookup identifies a likely public manufacturing location
+  in that country, then Nominatim geocodes it, OSRM calculates a driving route,
+  and Open-Meteo samples current temperatures along the route. The resulting
+  distance, duration, and weather are live context—not proof of the product's
+  actual historical journey.
 - If a manufacturing place, location permission, route, or weather is absent,
   the corresponding output stays unavailable. The app never substitutes a
   brand, barcode prefix, or preconfigured factory location.

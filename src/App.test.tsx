@@ -82,14 +82,13 @@ describe('sork.', () => {
     expect(await screen.findByRole('heading', { name: 'Test Protein Bar' })).toBeInTheDocument()
   })
 
-  it('renders changing scenario estimates only after a product record is found', async () => {
+  it('renders automatic journey estimates only after a product record is found', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify(productPayload), { status: 200 })))
     render(<App />)
     fireEvent.click(screen.getAllByRole('button', { name: /explore a product/i })[0])
     fireEvent.click(screen.getByRole('button', { name: /max protein bar/i }))
-    expect(await screen.findByRole('heading', { name: /change the conditions, not the facts/i })).toBeInTheDocument()
-    fireEvent.change(screen.getByLabelText(/transit temperature/i), { target: { value: '42' } })
-    expect(screen.getByLabelText(/transit temperature/i)).toHaveValue('42')
+    expect(await screen.findByRole('heading', { name: /route, conditions, and mode are calculated for you/i })).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Katpadi, Vellore')).toBeInTheDocument()
     expect(await screen.findByText(/modeled vitamin c loss in 24 hours/i)).toBeInTheDocument()
   })
 
@@ -100,7 +99,7 @@ describe('sork.', () => {
     fireEvent.click(screen.getByRole('button', { name: /max protein bar/i }))
 
     await waitFor(() => expect(screen.getByRole('heading', { name: /modeled availability curve/i })).toBeInTheDocument())
-    expect(screen.getByRole('img', { name: /projected vitamin c availability across 48 hours/i })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /projected vitamin c availability across 24 hours/i })).toBeInTheDocument()
   })
 
   it('supports roving keyboard navigation between product fact tabs', async () => {

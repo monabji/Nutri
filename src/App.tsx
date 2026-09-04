@@ -1,15 +1,19 @@
-import { ArrowDownRight, ArrowLeft, ArrowUpRight, Camera, Leaf, Menu, ScanLine, Search, ScanLine as ScanIcon, X } from 'lucide-react'
+import { ArrowDownRight, ArrowLeft, ArrowUpRight, Camera, Instagram, Leaf, Menu, ScanLine, Search, ScanLine as ScanIcon, ShoppingBasket, Sparkles, X } from 'lucide-react'
 import { FormEvent, lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { fetchProduct, ProductNotFoundError } from './api/openFoodFacts'
 import { findMissingFields } from './api/normalizeProduct'
 import { estimateMissingMicronutrients } from './api/geminiEstimate'
+import { findManufacturingSource } from './api/manufacturingSource'
+import { estimateTransportMode } from './api/transportMode'
 import { BarcodeCameraScanner } from './components/BarcodeCameraScanner'
+import { IngredientSafetyChecker } from './components/IngredientSafetyChecker'
 import { DataState } from './components/DataState'
 import { ProductFactsTabs } from './components/ProductFactsTabs'
 import { ScenarioControls } from './components/ScenarioControls'
 import { presets } from './config/presets'
 import { validateBarcode } from './lib/barcode'
 import { resolveAutomaticRoute, resolveRoute, type AutomaticOrigin } from './model/route'
+import { FIXED_DESTINATION } from './config/route'
 import type { LookupState, ProductFacts } from './types/product'
 import type { Availability, ResolvedRoute, ScenarioInput } from './types/scenario'
 
@@ -21,8 +25,14 @@ const journey = [
   { index: '03', title: 'Make the journey visible', copy: 'Explore transport conditions as transparent, clearly labeled scenarios.' },
 ]
 
-const defaultScenario: ScenarioInput = { temperatureC: 28, transitHours: 24, transportMode: 'ambient-truck' }
-const initialRoute: Availability<ResolvedRoute> = { status: 'unavailable', reason: 'Add both an origin and destination to display a route scenario.' }
+const everydayBenefits = [
+  { index: '01', icon: ShoppingBasket, title: 'Shop with context', copy: 'From a kirana shelf to a supermarket aisle, understand what a label is really telling you before you choose.' },
+  { index: '02', icon: Sparkles, title: 'Make unfamiliar words clearer', copy: 'Turn additive codes, processing scores, and nutrition gaps into simple language you can act on.' },
+  { index: '03', icon: Leaf, title: 'See the bigger journey', copy: 'Connect what is inside the pack with how it may have travelled, so everyday choices feel more informed.' },
+]
+
+const defaultScenario: ScenarioInput = { temperatureC: 28, transitHours: 24, transportMode: 'road' }
+const initialRoute: Availability<ResolvedRoute> = { status: 'unavailable', reason: 'Automatic route resolution starts after a product lookup.' }
 
 function BrandMark() { return <span className="brand-mark" aria-hidden="true"><span /><span /><span /></span> }
 function Footer() { return <footer className="site-footer"><div className="brand brand--static"><BrandMark /><span>sork.</span></div><p>Food, made more legible.</p><span>© {new Date().getFullYear()}</span></footer> }
@@ -34,7 +44,9 @@ function Landing({ onOpenDashboard }: { onOpenDashboard: () => void }) {
     <header className="site-header"><button className="brand" onClick={() => scrollTo('top')} aria-label="Back to top"><BrandMark /><span>sork.</span></button><nav className={menuOpen ? 'nav nav--open' : 'nav'} aria-label="Main navigation"><button onClick={() => scrollTo('how-it-works')}>How it works</button><button onClick={() => scrollTo('principles')}>Why it matters</button><button className="nav-cta" onClick={onOpenDashboard}>Explore a product <ArrowUpRight size={15} /></button></nav><button className="menu-toggle" type="button" onClick={() => setMenuOpen((open) => !open)} aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen}>{menuOpen ? <X size={19} /> : <Menu size={19} />}</button></header>
     <section className="hero" id="top" aria-labelledby="hero-title"><div className="hero-copy"><p className="hero-index">Food, made more legible.</p><h1 id="hero-title">There is more to a meal than its label.</h1><p className="hero-intro">sork. traces the signals behind a product—what it contains, how it is packaged, and the journey it may have taken to reach you.</p><button className="primary-button" onClick={onOpenDashboard}>Explore a product <ArrowDownRight size={18} /></button></div><div className="signal-frame" aria-label="An abstract trace from field to fork"><div className="signal-frame__topline"><span>Trace / 01</span><span>Food system signal</span></div><div className="signal-core"><div className="scan-orbit"><ScanLine size={27} strokeWidth={1.35} /></div><svg className="trace-line" viewBox="0 0 430 230" role="img" aria-label="A route becoming clearer"><path d="M25 182C85 182 98 71 166 71c69 0 70 104 136 104 54 0 62-65 102-65" /><circle cx="25" cy="182" r="4" /><circle cx="166" cy="71" r="4" /><circle cx="302" cy="175" r="4" /><circle cx="404" cy="110" r="5" /></svg><div className="trace-copy trace-copy--left"><Leaf size={14} /> origin</div><div className="trace-copy trace-copy--right">your shelf</div></div><p className="signal-caption">A barcode is not the full story. It is a place to begin.</p></div></section>
     <section className="journey-section" id="how-it-works" aria-labelledby="journey-title"><div className="section-heading"><p>How it works</p><h2 id="journey-title">A calmer way to ask better questions about food.</h2></div><div className="journey-list">{journey.map((item) => <article className="journey-row" key={item.index}><span className="journey-index">{item.index}</span><h3>{item.title}</h3><p>{item.copy}</p><ArrowUpRight className="journey-arrow" size={19} /></article>)}</div></section>
+    <section className="everyday-section" id="for-everyday" aria-labelledby="everyday-title"><div className="everyday-heading"><div><p className="section-label">For every Indian shopper</p><h2 id="everyday-title">A little more clarity can change what ends up in the basket.</h2></div><p>India’s food choices are wonderfully varied. sork. helps make the information behind packaged food easier to read—without asking anyone to become a nutrition expert.</p></div><div className="everyday-grid">{everydayBenefits.map(({ index, icon: Icon, title, copy }) => <article key={index}><span className="journey-index">{index}</span><Icon size={19} strokeWidth={1.5} /><h3>{title}</h3><p>{copy}</p></article>)}</div></section>
     <section className="principles-section" id="principles" aria-labelledby="principles-title"><div className="principles-quote"><p className="section-label">Built around uncertainty</p><h2 id="principles-title">Clarity does not mean pretending to know everything.</h2></div><div className="principles-panel"><div><span className="panel-number">01</span><h3>Facts stay factual.</h3><p>Source data is shown as source data, with gaps made visible instead of silently filled.</p></div><div><span className="panel-number">02</span><h3>Scenarios stay honest.</h3><p>Any estimate is framed as a model, shaped by clear assumptions you can inspect.</p></div></div></section>
+    <section className="inspiration-section" aria-labelledby="inspiration-title"><div className="inspiration-mark"><Instagram size={22} strokeWidth={1.5} /><span>Inspired by</span></div><div className="inspiration-copy"><h2 id="inspiration-title">A healthier India starts with better questions.</h2><p>sork. is inspired by <a href="https://www.instagram.com/foodpharmer/" target="_blank" rel="noreferrer">@foodpharmer</a> and his dedication to debunking brands and products, helping people make healthier choices with more confidence.</p><a className="inspiration-link" href="https://www.instagram.com/foodpharmer/" target="_blank" rel="noreferrer">Visit @foodpharmer on Instagram <ArrowUpRight size={16} /></a></div></section>
     <section className="next-section" id="next" aria-labelledby="next-title"><div><p className="section-label">The first chapter</p><h2 id="next-title">The product journey is coming into view.</h2></div><div className="next-action"><p>The product explorer is now ready for live barcode lookups and scenario exploration.</p><button className="outline-button" onClick={onOpenDashboard}>Open explorer <ArrowUpRight size={17} /></button></div></section><Footer />
   </main>
 }
@@ -53,8 +65,10 @@ function Dashboard({ onBack }: { onBack: () => void }) {
   const automaticRouteControllerRef = useRef<AbortController | null>(null)
 
   useEffect(() => () => { controllerRef.current?.abort(); routeControllerRef.current?.abort(); automaticRouteControllerRef.current?.abort() }, [])
-  const getAutomaticOrigin = (product: ProductFacts): AutomaticOrigin | undefined => {
+  const getAutomaticOrigin = async (product: ProductFacts, signal: AbortSignal): Promise<AutomaticOrigin | undefined> => {
     if (product.manufacturingPlaces?.[0]) return { query: product.manufacturingPlaces[0], kind: 'manufacturing-place' }
+    const researched = await findManufacturingSource(product, signal)
+    if (researched) return { query: researched.location, kind: 'researched-source', sourceEvidence: researched.evidence }
     if (product.countries?.[0]) return { query: product.countries[0], kind: 'country-proxy' }
     return undefined
   }
@@ -63,21 +77,20 @@ function Dashboard({ onBack }: { onBack: () => void }) {
     const controller = new AbortController()
     automaticRouteControllerRef.current = controller
     setRouteLoading(true)
-    setRoute({ status: 'unavailable', reason: 'Resolving a source-reported origin, your device location, and live route conditions…' })
+    setRoute({ status: 'unavailable', reason: 'Resolving the manufacturing source and live route conditions to Katpadi, Vellore…' })
     try {
-      const resolvedRoute = await resolveAutomaticRoute(getAutomaticOrigin(product), controller.signal)
+      const resolvedRoute = await resolveAutomaticRoute(await getAutomaticOrigin(product, controller.signal), controller.signal)
       if (controller.signal.aborted) return
-      setRoute(resolvedRoute)
       if (resolvedRoute.status === 'available') {
-        setScenario((current) => ({
-          ...current,
-          origin: resolvedRoute.value.origin.label,
-          destination: resolvedRoute.value.destination.label,
-          distanceKm: resolvedRoute.value.distanceKm === undefined ? current.distanceKm : Number(resolvedRoute.value.distanceKm.toFixed(1)),
-          transitHours: resolvedRoute.value.durationHours === undefined ? current.transitHours : Math.min(48, Math.max(1, Math.round(resolvedRoute.value.durationHours))),
-          temperatureC: resolvedRoute.value.weather ? Math.round(resolvedRoute.value.weather.averageTemperatureC) : current.temperatureC,
-        }))
+        const mode = await estimateTransportMode(product, resolvedRoute.value.origin.label, FIXED_DESTINATION.label, controller.signal)
+        const modeRoute = await resolveAutomaticRoute({ query: resolvedRoute.value.origin.label, kind: resolvedRoute.value.originKind || 'country-proxy' }, controller.signal, mode)
+        if (modeRoute.status === 'available') setRoute(modeRoute)
+        setScenario((current) => ({ ...current, transportMode: mode }))
+        if (modeRoute.status === 'available') setScenario((current) => ({ ...current, origin: modeRoute.value.origin.label, destination: FIXED_DESTINATION.label, distanceKm: modeRoute.value.distanceKm === undefined ? current.distanceKm : Number(modeRoute.value.distanceKm.toFixed(1)), transitHours: modeRoute.value.durationHours === undefined ? current.transitHours : Math.max(1, Math.ceil(modeRoute.value.durationHours)), temperatureC: modeRoute.value.weather ? Math.round(modeRoute.value.weather.averageTemperatureC) : current.temperatureC }))
+        if (!controller.signal.aborted) setRouteLoading(false)
+        return
       }
+      setRoute(resolvedRoute)
     } catch {
       if (!controller.signal.aborted) setRoute(initialRoute)
     } finally {
@@ -110,7 +123,7 @@ function Dashboard({ onBack }: { onBack: () => void }) {
   }, [applyAutomaticRoute])
   const submit = (event: FormEvent) => { event.preventDefault(); void lookupBarcode(barcodeInput) }
   const choosePreset = (barcode: string) => { setBarcodeInput(barcode); void lookupBarcode(barcode) }
-  const handleScenarioChange = (patch: Partial<ScenarioInput>) => { setScenario((current) => ({ ...current, ...patch })); if ('origin' in patch || 'destination' in patch) setRoute(initialRoute) }
+  const handleScenarioChange = (_patch: Partial<ScenarioInput>) => undefined
   const handleResolveRoute = async () => {
     routeControllerRef.current?.abort(); const controller = new AbortController(); routeControllerRef.current = controller; setRouteLoading(true)
     const nextRoute = await resolveRoute(scenario.origin, scenario.destination, controller.signal)
@@ -139,8 +152,9 @@ function ProductDashboard({ product, micronutrientStatus, missingFields, scenari
   const partial = missingFields.length > 0
   return <section className="product-dashboard" aria-labelledby="product-title">
     <div className="journey-context"><span className="journey-context__icon"><ScanIcon size={16} /></span><div><h2 id="product-title">{product.name || 'Unnamed product'}</h2><p>{product.brands?.join(' · ') || 'Brand not reported by Open Food Facts.'}</p></div><span className={partial ? 'live-badge live-badge--partial' : 'live-badge'}>{partial ? 'Partial source record' : 'Source-reported facts'}</span></div>
-    <ScenarioControls scenario={scenario} onChange={onScenarioChange} onResolveRoute={onResolveRoute} routeLoading={routeLoading} automaticRoute={route} onRetryAutomaticRoute={onRetryAutomaticRoute} />
+    <ScenarioControls scenario={scenario} routeLoading={routeLoading} automaticRoute={route} onRetryAutomaticRoute={onRetryAutomaticRoute} />
     <Suspense fallback={<div className="scenario-loading" role="status">Preparing scenario workspace…</div>}><ScenarioVisuals product={product} scenario={scenario} route={route} /></Suspense>
+    <IngredientSafetyChecker initialIngredients={product.ingredientsText} />
     <ProductFactsTabs product={product} missingFields={missingFields} micronutrientStatus={micronutrientStatus} />
   </section>
 }

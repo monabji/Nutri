@@ -1,4 +1,4 @@
-export type TransportMode = 'ambient-truck' | 'cold-chain-reefer'
+export type TransportMode = 'road' | 'air' | 'sea' | 'ambient-truck' | 'cold-chain-reefer'
 
 export type ScenarioInput = {
   temperatureC: number
@@ -54,7 +54,8 @@ export type ResolvedRoute = {
   durationHours?: number
   weather?: RouteWeather
   routingKind?: 'direct-line' | 'driving'
-  originKind?: 'manufacturing-place' | 'country-proxy'
+  originKind?: 'manufacturing-place' | 'country-proxy' | 'researched-source'
+  sourceEvidence?: Array<{ title: string; url: string }>
 }
 
 export type RouteWeather = {

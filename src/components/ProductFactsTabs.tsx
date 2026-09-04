@@ -72,14 +72,14 @@ export function ProductFactsTabs({ product, missingFields, micronutrientStatus }
       <div id={`${panelId}-${activeTab}-panel`} role="tabpanel" aria-labelledby={`${panelId}-${activeTab}-tab`} className="facts-tab-panel">
         {activeTab === 'summary' ? (
           <div className="facts-summary-grid">
-            <MetricCard label="NOVA group" value={product.novaGroup ? `Group ${product.novaGroup}` : undefined} />
-            <MetricCard label="Eco-Score" value={product.ecoScore} />
-            <MetricCard label="Quantity" value={product.quantityGrams ? `${product.quantityGrams} g` : undefined} />
-            <MetricCard label="Additives" value={product.additives?.length} />
+            <MetricCard label="NOVA group" value={product.novaGroup ? `Group ${product.novaGroup}` : undefined} detail="How processed the food is: 1 is least processed, 4 is most." />
+            <MetricCard label="Eco-Score" value={product.ecoScore} detail="A simple A–E rating of the product's environmental impact." />
+            <MetricCard label="Quantity" value={product.quantityGrams ? `${product.quantityGrams} g` : undefined} detail="The amount of food in the pack." />
+            <MetricCard label="Additives" value={product.additives?.length} detail="Added substances used for colour, texture, taste, or shelf life." />
             <article className="facts-mini-card facts-mini-card--wide">
               <Box size={17} aria-hidden="true" />
               <div>
-                <h3>Origins & packaging</h3>
+                <h3>Origins & packaging</h3><p className="facts-mini-card__description">Where the source says it comes from and what it is wrapped in.</p>
                 <p>{product.manufacturingPlaces?.join(', ') || product.origins?.join(', ') || product.countries?.join(', ') || 'Not reported by Open Food Facts.'}</p>
                 <span>{product.packaging?.map((item) => item.label).join(', ') || 'Packaging not reported'}</span>
               </div>
@@ -98,8 +98,8 @@ export function ProductFactsTabs({ product, missingFields, micronutrientStatus }
         {activeTab === 'nutrition' ? (
           <div className="facts-reading-card">
             <div className="facts-reading-card__heading"><Sparkles size={18} aria-hidden="true" /><div><h3>Nutrition per 100 g</h3><p>Reported values stay separate from estimates.</p></div></div>
-            {Object.keys(product.nutrients).length ? <dl className="nutrient-list nutrient-list--compact">{Object.entries(product.nutrients).map(([name, nutrient]) => <div key={name}><dt>{name}</dt><dd>{nutrient.value} {nutrient.unit}</dd></div>)}{Object.entries(product.estimatedNutrients || {}).map(([name, nutrient]) => <div key={name} className="nutrient-estimate"><dt>{name} <small>Gemini estimate</small></dt><dd>{nutrient.value} {nutrient.unit}</dd></div>)}</dl> : <p className="facts-reading-copy">Not reported by Open Food Facts.</p>}
-            {micronutrientStatus === 'loading' ? <p className="estimate-note">Estimating missing micronutrients with Gemini…</p> : micronutrientStatus === 'ready' ? <p className="estimate-note">Gemini estimates are separate from source facts and only inform the modeled curve.</p> : micronutrientStatus === 'unavailable' && !Object.keys(product.estimatedNutrients || {}).length ? <p className="estimate-note estimate-note--unavailable">Gemini estimate unavailable; missing source values remain unavailable.</p> : null}
+            {Object.keys(product.nutrients).length ? <dl className="nutrient-list nutrient-list--compact">{Object.entries(product.nutrients).map(([name, nutrient]) => <div key={name}><dt>{name}</dt><dd>{nutrient.value} {nutrient.unit}</dd></div>)}{Object.entries(product.estimatedNutrients || {}).map(([name, nutrient]) => <div key={name} className="nutrient-estimate"><dt>{name} <small>Modeled baseline</small></dt><dd>{nutrient.value} {nutrient.unit}</dd></div>)}</dl> : <p className="facts-reading-copy">Not reported by Open Food Facts.</p>}
+            {micronutrientStatus === 'loading' ? <p className="estimate-note">Calculating missing micronutrient baselines…</p> : micronutrientStatus === 'ready' ? <p className="estimate-note">Modeled baselines are separate from source facts and only inform the curve.</p> : micronutrientStatus === 'unavailable' && !Object.keys(product.estimatedNutrients || {}).length ? <p className="estimate-note estimate-note--unavailable">A modeled baseline was unavailable; missing source values remain unavailable.</p> : null}
           </div>
         ) : null}
 
