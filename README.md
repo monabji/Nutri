@@ -24,6 +24,17 @@ The dashboard is informational: source facts and scenario estimates remain visua
 
 Gemini is used only when Open Food Facts does not report the supported Vitamin C/B fields. Estimates are educational baselines, never measured nutrition data. Configure the server-side key with `GEMINI_API_KEY` in `.env.local`; never expose or commit it.
 
+## Deploy to Vercel
+
+1. Import this repository into Vercel and keep the Vite preset.
+2. Use `npm run build` as the build command and `dist` as the output directory.
+3. Add `GEMINI_API_KEY` as a Vercel Environment Variable for Preview and Production. The key is read only by the `/api` serverless functions; do not create a `VITE_GEMINI_API_KEY` variable.
+4. Deploy. The included `vercel.json` keeps client-side routes working while leaving `/api/*` available as serverless endpoints.
+
+### Mobile barcode scanning
+
+The dashboard uses `@zxing/browser` to decode EAN barcodes from a live video stream. On a phone, open the deployed HTTPS URL, choose **Scan barcode**, allow camera access, and point the rear camera at the barcode. Vercel provides the HTTPS requirement needed by `getUserMedia`; Google Lens is not required and cannot be embedded as a dependable app scanner. Manual barcode entry remains available when camera access is unavailable or denied.
+
 ## Planned stack
 
 - React
