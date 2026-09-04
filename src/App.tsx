@@ -5,6 +5,7 @@ import { findMissingFields } from './api/normalizeProduct'
 import { estimateMissingMicronutrients } from './api/geminiEstimate'
 import { findManufacturingSource } from './api/manufacturingSource'
 import { estimateTransportMode } from './api/transportMode'
+import { completeProductProfile } from './api/productProfile'
 import { BarcodeCameraScanner } from './components/BarcodeCameraScanner'
 import { IngredientSafetyChecker } from './components/IngredientSafetyChecker'
 import { DataState } from './components/DataState'
@@ -14,6 +15,7 @@ import { presets } from './config/presets'
 import { validateBarcode } from './lib/barcode'
 import { resolveAutomaticRoute, resolveRoute, type AutomaticOrigin } from './model/route'
 import { FIXED_DESTINATION } from './config/route'
+import { getDemoProduct } from './config/demoProducts'
 import type { LookupState, ProductFacts } from './types/product'
 import type { Availability, ResolvedRoute, ScenarioInput } from './types/scenario'
 
@@ -78,6 +80,13 @@ function Dashboard({ onBack }: { onBack: () => void }) {
     automaticRouteControllerRef.current = controller
     setRouteLoading(true)
     setRoute({ status: 'unavailable', reason: 'Resolving the manufacturing source and live route conditions to Katpadi, Vellore…' })
+    const demoRoute = product.demoRoute
+    if (demoRoute) {
+      setRoute({ status: 'available', value: demoRoute })
+      setScenario((current) => ({ ...current, origin: demoRoute.origin.label, destination: FIXED_DESTINATION.label, distanceKm: demoRoute.distanceKm, transitHours: Math.ceil(demoRoute.durationHours || current.transitHours), temperatureC: Math.round(demoRoute.weather?.averageTemperatureC || current.temperatureC), transportMode: 'road' }))
+      setRouteLoading(false)
+      return
+    }
     try {
       const resolvedRoute = await resolveAutomaticRoute(await getAutomaticOrigin(product, controller.signal), controller.signal)
       if (controller.signal.aborted) return
@@ -105,16 +114,23 @@ function Dashboard({ onBack }: { onBack: () => void }) {
     const controller = new AbortController(); controllerRef.current = controller
     setLookup({ status: 'loading', barcode: validation.barcode })
     try {
-      const product = await fetchProduct(validation.barcode, controller.signal)
-      setLookup({ status: 'success', product, missingFields: findMissingFields(product) })
-      setMicronutrientStatus('loading')
-      void estimateMissingMicronutrients(product, controller.signal).then((estimatedNutrients) => {
-        if (controller.signal.aborted) return
-        setLookup({ status: 'success', product: { ...product, estimatedNutrients }, missingFields: findMissingFields(product) })
-        setMicronutrientStatus(Object.keys(estimatedNutrients).length ? 'ready' : 'unavailable')
-      }).catch(() => { if (!controller.signal.aborted) setMicronutrientStatus('unavailable') })
-      setScenario((current) => current.massKg ? current : { ...current, massKg: product.quantityGrams ? product.quantityGrams / 1000 : undefined })
-      void applyAutomaticRoute(product)
+      let product: ProductFacts | undefined
+      try { product = await fetchProduct(validation.barcode, controller.signal) } catch (error) {
+        if (!(error instanceof ProductNotFoundError)) throw error
+      }
+      const completedProduct = getDemoProduct(validation.barcode) || await completeProductProfile(product, validation.barcode, controller.signal)
+      setLookup({ status: 'success', product: completedProduct, missingFields: findMissingFields(product || completedProduct) })
+      if (completedProduct.demoRoute) setMicronutrientStatus(Object.keys(completedProduct.estimatedNutrients || {}).length ? 'ready' : 'unavailable')
+      else {
+        setMicronutrientStatus('loading')
+        void estimateMissingMicronutrients(completedProduct, controller.signal).then((estimatedNutrients) => {
+          if (controller.signal.aborted) return
+          setLookup({ status: 'success', product: { ...completedProduct, estimatedNutrients: { ...completedProduct.estimatedNutrients, ...estimatedNutrients } }, missingFields: findMissingFields(product || completedProduct) })
+          setMicronutrientStatus(Object.keys(estimatedNutrients).length ? 'ready' : 'unavailable')
+        }).catch(() => { if (!controller.signal.aborted) setMicronutrientStatus('unavailable') })
+      }
+      setScenario((current) => current.massKg ? current : { ...current, massKg: completedProduct.quantityGrams ? completedProduct.quantityGrams / 1000 : undefined })
+      void applyAutomaticRoute(completedProduct)
     } catch (error) {
       if (controller.signal.aborted) return
       if (error instanceof ProductNotFoundError) setLookup({ status: 'not-found', barcode: validation.barcode })

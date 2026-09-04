@@ -53,27 +53,29 @@ describe('sork.', () => {
     expect(screen.getByRole('link', { name: /view source record/i })).toHaveAttribute('href', 'https://world.openfoodfacts.org/product/8906009532363')
   })
 
-  it('explains an unavailable record without showing product fallbacks', async () => {
+  it('builds a complete modeled profile when no source record is found', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ status: 0 }), { status: 200 })))
     render(<App />)
     fireEvent.click(screen.getAllByRole('button', { name: /explore a product/i })[0])
     fireEvent.click(screen.getByRole('button', { name: /max protein bar/i }))
-    await waitFor(() => expect(screen.getByText('No product record found.')).toBeInTheDocument())
-    expect(screen.queryByText('Test Protein Bar')).not.toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Product 8906009532363' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('tab', { name: /nutrition/i }))
+    expect(screen.getAllByText('Modeled baseline').length).toBeGreaterThan(0)
   })
 
-  it('identifies a partial record and labels unavailable metric data honestly', async () => {
+  it('completes a partial record with modeled values', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ status: 1, product: { code: '8906009532363', product_name: 'Sparse record' } }), { status: 200 })))
     render(<App />)
     fireEvent.click(screen.getAllByRole('button', { name: /explore a product/i })[0])
     fireEvent.click(screen.getByRole('button', { name: /max protein bar/i }))
     expect(await screen.findByRole('heading', { name: 'Sparse record' })).toBeInTheDocument()
     expect(screen.getByText('Partial source record')).toBeInTheDocument()
-    expect(screen.getAllByText('Not reported by Open Food Facts').length).toBeGreaterThan(1)
+    fireEvent.click(screen.getByRole('tab', { name: /nutrition/i }))
+    expect(screen.getAllByText('Modeled baseline').length).toBeGreaterThan(0)
   })
 
   it('retries a failed network lookup', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValueOnce(new Error('Network unavailable')).mockResolvedValueOnce(new Response(JSON.stringify(productPayload), { status: 200 })))
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValueOnce(new Error('Network unavailable')).mockResolvedValueOnce(new Response(JSON.stringify(productPayload), { status: 200 })).mockResolvedValue(new Response(JSON.stringify({ profile: { name: 'Test Protein Bar', brand: 'Test Brand', ingredients: 'Oats', additives: [], packaging: ['paper'], manufacturingPlace: 'Bengaluru, India', originCountry: 'India', quantityGrams: 50, novaGroup: 4, ecoScore: 'B', nutrients: { 'Vitamin C': 12 } } }), { status: 200 })))
     render(<App />)
     fireEvent.click(screen.getAllByRole('button', { name: /explore a product/i })[0])
     fireEvent.click(screen.getByRole('button', { name: /max protein bar/i }))

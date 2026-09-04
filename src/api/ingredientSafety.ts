@@ -9,7 +9,7 @@ export type IngredientSafetyFinding = {
 
 export async function checkIngredientSafety(ingredients: string[], signal?: AbortSignal): Promise<IngredientSafetyFinding[]> {
   const response = await fetch('/api/gemini/ingredient-safety', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal, body: JSON.stringify({ ingredients }) })
-  const payload = await response.json() as { findings?: IngredientSafetyFinding[]; error?: string }
+  const payload = await response.json().catch(() => ({})) as { findings?: IngredientSafetyFinding[]; error?: string }
   if (!response.ok) throw new Error(payload.error || 'Ingredient safety lookup failed.')
   return payload.findings || []
 }

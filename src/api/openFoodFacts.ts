@@ -1,5 +1,6 @@
 import { normalizeProduct, productFields, type RawProduct } from './normalizeProduct'
 import { isSupportedProductBarcode, normalizeBarcode } from '../lib/barcode'
+import { getDemoProduct } from '../config/demoProducts'
 
 const endpoint = 'https://world.openfoodfacts.org/api/v2/product'
 const timeoutMs = 8_000
@@ -19,6 +20,8 @@ export class ProductDataError extends Error {
 export async function fetchProduct(barcode: string, signal?: AbortSignal) {
   const normalizedBarcode = normalizeBarcode(barcode)
   if (!isSupportedProductBarcode(normalizedBarcode)) throw new ProductDataError('Enter an 8–14 digit product barcode.')
+  const demoProduct = getDemoProduct(normalizedBarcode)
+  if (demoProduct) return demoProduct
   const timeoutController = new AbortController()
   const timeout = window.setTimeout(() => timeoutController.abort(), timeoutMs)
   const combinedSignal = signal ? AbortSignal.any([signal, timeoutController.signal]) : timeoutController.signal

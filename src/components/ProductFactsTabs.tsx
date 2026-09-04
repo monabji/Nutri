@@ -46,7 +46,7 @@ export function ProductFactsTabs({ product, missingFields, micronutrientStatus }
           <p className="section-kicker">Product record</p>
           <h2 id="facts-tabs-title">Source details</h2>
         </div>
-        <p>Everything here is reported by Open Food Facts, unless clearly marked as an estimate.</p>
+        <p>Source facts are shown alongside modeled estimates when the public record is incomplete.</p>
       </div>
 
       <div className="facts-tablist" role="tablist" aria-label="Product source details">
@@ -98,8 +98,8 @@ export function ProductFactsTabs({ product, missingFields, micronutrientStatus }
         {activeTab === 'nutrition' ? (
           <div className="facts-reading-card">
             <div className="facts-reading-card__heading"><Sparkles size={18} aria-hidden="true" /><div><h3>Nutrition per 100 g</h3><p>Reported values stay separate from estimates.</p></div></div>
-            {Object.keys(product.nutrients).length ? <dl className="nutrient-list nutrient-list--compact">{Object.entries(product.nutrients).map(([name, nutrient]) => <div key={name}><dt>{name}</dt><dd>{nutrient.value} {nutrient.unit}</dd></div>)}{Object.entries(product.estimatedNutrients || {}).map(([name, nutrient]) => <div key={name} className="nutrient-estimate"><dt>{name} <small>Modeled baseline</small></dt><dd>{nutrient.value} {nutrient.unit}</dd></div>)}</dl> : <p className="facts-reading-copy">Not reported by Open Food Facts.</p>}
-            {micronutrientStatus === 'loading' ? <p className="estimate-note">Calculating missing micronutrient baselines…</p> : micronutrientStatus === 'ready' ? <p className="estimate-note">Modeled baselines are separate from source facts and only inform the curve.</p> : micronutrientStatus === 'unavailable' && !Object.keys(product.estimatedNutrients || {}).length ? <p className="estimate-note estimate-note--unavailable">A modeled baseline was unavailable; missing source values remain unavailable.</p> : null}
+            {Object.keys(product.nutrients).length || Object.keys(product.estimatedNutrients || {}).length ? <dl className="nutrient-list nutrient-list--compact">{Object.entries(product.nutrients).map(([name, nutrient]) => <div key={name}><dt>{name}</dt><dd>{nutrient.value} {nutrient.unit}</dd></div>)}{Object.entries(product.estimatedNutrients || {}).map(([name, nutrient]) => <div key={name} className="nutrient-estimate"><dt>{name} <small>Modeled baseline</small></dt><dd>{nutrient.value} {nutrient.unit}</dd></div>)}</dl> : <p className="facts-reading-copy">A modeled nutrition profile is being prepared.</p>}
+            {micronutrientStatus === 'loading' ? <p className="estimate-note">Calculating missing micronutrient baselines…</p> : micronutrientStatus === 'ready' ? <p className="estimate-note">Modeled baselines are separate from source facts and only inform the curve.</p> : micronutrientStatus === 'unavailable' ? <p className="estimate-note">The complete modeled profile is shown where the source record had gaps.</p> : null}
           </div>
         ) : null}
 

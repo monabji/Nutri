@@ -1,3 +1,5 @@
+import type { ResolvedRoute } from './scenario'
+
 export type NutrientValue = {
   value: number
   unit: string
@@ -22,6 +24,8 @@ export type ProductFacts = {
   quantityGrams?: number
   nutrients: Record<string, NutrientValue>
   estimatedNutrients?: Record<string, NutrientValue>
+  modeledFields?: string[]
+  demoRoute?: ResolvedRoute
   sourceUrl: string
   fetchedAt: string
 }
