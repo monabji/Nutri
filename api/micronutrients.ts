@@ -1,4 +1,4 @@
-import { extractJson, geminiJson, readJson, send } from './_gemini'
+import { extractJson, geminiJson, readJson, send } from './_gemini.js'
 
 export default async function handler(request: any, response: any) {
   if (request.method !== 'POST') return send(response, 405, { error: 'Method not allowed.' })

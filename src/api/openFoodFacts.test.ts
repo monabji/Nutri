@@ -12,8 +12,8 @@ describe('Open Food Facts client', () => {
   it('returns the two hackathon demo records without depending on a live response', async () => {
     const fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
-    await expect(fetchProduct('8901719117183')).resolves.toMatchObject({ name: expect.stringContaining('Hide & Seek'), barcode: '8901719117183' })
-    await expect(fetchProduct('8901491100267')).resolves.toMatchObject({ name: expect.stringContaining('Lay'), barcode: '8901491100267' })
+    await expect(fetchProduct('8901719117183')).resolves.toMatchObject({ name: expect.stringContaining('Hide & Seek'), barcode: '8901719117183', manufacturingPlaces: [expect.stringContaining('Tumkur Road')], demoRoute: { origin: { label: expect.stringContaining('Parle Products') }, originKind: 'researched-source' } })
+    await expect(fetchProduct('8901491100267')).resolves.toMatchObject({ name: expect.stringContaining('Lay'), barcode: '8901491100267', manufacturingPlaces: [expect.stringContaining('Plot Q1')], demoRoute: { origin: { label: expect.stringContaining('Plot Q1') }, originKind: 'manufacturing-place' } })
     expect(fetchMock).not.toHaveBeenCalled()
   })
 

@@ -1,9 +1,9 @@
 import { AlertTriangle, CheckCircle2, FlaskConical, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { checkIngredientSafety, type IngredientSafetyFinding } from '../api/ingredientSafety'
+import { splitIngredients } from '../lib/ingredientList'
 
 type Props = { initialIngredients?: string }
-const splitIngredients = (value: string) => value.split(/[\n,;]+/).map((item) => item.trim()).filter(Boolean)
 const statusLabel = (status: string) => status === 'banned' ? 'Banned' : status === 'restricted' ? 'Restricted' : status === 'unclear' ? 'Unclear' : 'Allowed'
 
 function StatusBadge({ status }: { status: string }) { return <span className={`safety-badge safety-badge--${status}`}>{statusLabel(status)}</span> }

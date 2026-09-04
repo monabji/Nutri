@@ -1,4 +1,4 @@
-import { geminiJson, send } from './_gemini'
+import { geminiJson, send } from './_gemini.js'
 
 const schema = {
   type: 'object', properties: { profile: { type: 'object', properties: {
