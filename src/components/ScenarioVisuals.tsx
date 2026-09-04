@@ -78,16 +78,16 @@ export function ScenarioVisuals({ product, scenario, route }: Props) {
 
       <div className="scenario-visual-grid">
         <article className="scenario-visual-card decay-chart-card">
-          <div className="visual-card-heading"><div><p className="eyebrow">0–48 hour curve</p><h3>Modeled availability curve</h3></div><span>{transportModeLabels[scenario.transportMode]}</span></div>
+          <div className="visual-card-heading"><h3>Modeled availability curve</h3><span>{transportModeLabels[scenario.transportMode]}</span></div>
           {decay.status === 'available' ? (
-            <div className="chart-wrap">
+            <div className="chart-wrap" role="img" aria-label={`Projected ${decay.value.nutrient} availability across 48 hours`}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={decay.value.series} margin={{ top: 12, right: 12, left: -12, bottom: 0 }}>
-                  <CartesianGrid stroke="#263029" strokeDasharray="2 6" vertical={false} />
-                  <XAxis dataKey="hour" tick={{ fill: '#8e988f', fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}h`} interval={11} />
-                  <YAxis domain={[0, 100]} tick={{ fill: '#8e988f', fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}%`} width={38} />
-                  <Tooltip cursor={{ stroke: '#566057', strokeDasharray: '4 4' }} contentStyle={{ background: '#151b16', border: '1px solid #39433a', borderRadius: '10px', color: '#f4f5ef' }} labelFormatter={(value) => `${value} hours`} formatter={(value) => [`${value}%`, 'Remaining']} />
-                  <Line type="monotone" dataKey="remainingPercent" stroke={scenario.transportMode === 'cold-chain-reefer' ? '#79c7ff' : '#c9ff5b'} strokeWidth={2.4} dot={false} activeDot={{ r: 4 }} />
+                  <CartesianGrid stroke="#3a3a3a" strokeDasharray="2 6" vertical={false} />
+                  <XAxis dataKey="hour" tick={{ fill: '#a0a0a0', fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}h`} interval={11} />
+                  <YAxis domain={[0, 100]} tick={{ fill: '#a0a0a0', fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}%`} width={38} />
+                  <Tooltip cursor={{ stroke: '#6b6b6b', strokeDasharray: '4 4' }} contentStyle={{ background: '#171717', border: '1px solid #4a4a4a', borderRadius: '10px', color: '#f4f4f4' }} labelFormatter={(value) => `${value} hours`} formatter={(value) => [`${value}%`, 'Remaining']} />
+                  <Line type="monotone" dataKey="remainingPercent" stroke={scenario.transportMode === 'cold-chain-reefer' ? '#b8b8b8' : '#f2f2f2'} strokeWidth={2.4} dot={false} activeDot={{ r: 4 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -96,7 +96,7 @@ export function ScenarioVisuals({ product, scenario, route }: Props) {
         </article>
 
         <article className="scenario-visual-card route-card">
-          <div className="visual-card-heading"><div><p className="eyebrow">Route scenario</p><h3>Origin to destination</h3></div><Map size={18} /></div>
+          <div className="visual-card-heading"><h3>Origin to destination</h3><Map size={18} /></div>
           {route.status === 'available'
             ? <RouteMap route={route.value} transportMode={scenario.transportMode} />
             : <div className="visual-unavailable"><Leaf size={18} /><p>{route.reason}</p></div>}

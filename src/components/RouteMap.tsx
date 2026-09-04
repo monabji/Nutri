@@ -29,11 +29,11 @@ export function RouteMap({ route, transportMode }: Props) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <Polyline positions={path} pathOptions={{ color: isColdChain ? '#79c7ff' : '#c9ff5b', weight: 3, dashArray: isColdChain ? '8 8' : '3 8' }} />
-        <CircleMarker center={path[0]} radius={7} pathOptions={{ color: '#0d120e', fillColor: '#c9ff5b', fillOpacity: 1, weight: 2 }}>
+        <Polyline positions={path} pathOptions={{ color: isColdChain ? '#b8b8b8' : '#f2f2f2', weight: 3, dashArray: isColdChain ? '8 8' : '3 8' }} />
+        <CircleMarker center={path[0]} radius={7} pathOptions={{ color: '#101010', fillColor: '#f2f2f2', fillOpacity: 1, weight: 2 }}>
           <Tooltip direction="top" offset={[0, -8]}>{route.origin.label}</Tooltip>
         </CircleMarker>
-        <CircleMarker center={path[1]} radius={7} pathOptions={{ color: '#0d120e', fillColor: isColdChain ? '#79c7ff' : '#f3f6ed', fillOpacity: 1, weight: 2 }}>
+        <CircleMarker center={path[1]} radius={7} pathOptions={{ color: '#101010', fillColor: isColdChain ? '#b8b8b8' : '#dedede', fillOpacity: 1, weight: 2 }}>
           <Tooltip direction="top" offset={[0, -8]}>{route.destination.label}</Tooltip>
         </CircleMarker>
         <FitRoute route={route} />

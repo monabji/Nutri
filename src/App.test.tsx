@@ -28,7 +28,7 @@ describe('sork.', () => {
   it('opens the dashboard from the landing page', () => {
     render(<App />)
     fireEvent.click(screen.getAllByRole('button', { name: /explore a product/i })[0])
-    expect(screen.getByRole('heading', { name: /start with the record. then make the journey visible/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /live barcode lookup/i })).toBeInTheDocument()
   })
 
   it('validates barcodes before requesting data', () => {
@@ -47,7 +47,9 @@ describe('sork.', () => {
     fireEvent.click(screen.getByRole('button', { name: /^look up$/i }))
     expect(await screen.findByRole('heading', { name: 'Test Protein Bar' })).toBeInTheDocument()
     expect(screen.getByText('Group 4')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('tab', { name: /nutrition/i }))
     expect(screen.getByText('380 kcal/100g')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('tab', { name: /source/i }))
     expect(screen.getByRole('link', { name: /view source record/i })).toHaveAttribute('href', 'https://world.openfoodfacts.org/product/8906009532363')
   })
 
@@ -89,6 +91,33 @@ describe('sork.', () => {
     fireEvent.change(screen.getByLabelText(/transit temperature/i), { target: { value: '42' } })
     expect(screen.getByLabelText(/transit temperature/i)).toHaveValue('42')
     expect(await screen.findByText(/modeled vitamin c loss in 24 hours/i)).toBeInTheDocument()
+  })
+
+  it('renders the modeled availability curve when the source record contains a supported vitamin', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify(productPayload), { status: 200 })))
+    render(<App />)
+    fireEvent.click(screen.getAllByRole('button', { name: /explore a product/i })[0])
+    fireEvent.click(screen.getByRole('button', { name: /max protein bar/i }))
+
+    await waitFor(() => expect(screen.getByRole('heading', { name: /modeled availability curve/i })).toBeInTheDocument())
+    expect(screen.getByRole('img', { name: /projected vitamin c availability across 48 hours/i })).toBeInTheDocument()
+  })
+
+  it('supports roving keyboard navigation between product fact tabs', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify(productPayload), { status: 200 })))
+    render(<App />)
+    fireEvent.click(screen.getAllByRole('button', { name: /explore a product/i })[0])
+    fireEvent.click(screen.getByRole('button', { name: /max protein bar/i }))
+
+    const summaryTab = await screen.findByRole('tab', { name: /summary/i })
+    fireEvent.keyDown(summaryTab, { key: 'End' })
+    const sourceTab = screen.getByRole('tab', { name: /source/i })
+    expect(sourceTab).toHaveAttribute('aria-selected', 'true')
+    expect(sourceTab).toHaveFocus()
+
+    fireEvent.keyDown(sourceTab, { key: 'Home' })
+    expect(summaryTab).toHaveAttribute('aria-selected', 'true')
+    expect(summaryTab).toHaveFocus()
   })
 
   it('opens a camera scanner fallback when camera APIs are unavailable', async () => {
